@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane prefHeight="426.0" prefWidth="717.0" style="-fx-background-color: cyan;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="socialnetwork.controller.LogIn_Controller">
+   <children>
+      <Button layoutX="195.0" layoutY="218.0" mnemonicParsing="false" onAction="#handleLogIn" text="Log in" textFill="#fa8c17" />
+      <Text fill="#fa8c17" layoutX="14.0" layoutY="68.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Welcome!">
+         <font>
+            <Font size="42.0" />
+         </font>
+      </Text>
+      <TextField fx:id="TextFIeldID" layoutX="95.0" layoutY="144.0" prefHeight="26.0" prefWidth="160.0" promptText="Insert Your ID Here" />
+      <TextField editable="false" layoutX="95.0" layoutY="174.0" prefHeight="26.0" prefWidth="160.0" text="in progess..." />
+      <Text fill="#fa8c17" layoutX="14.0" layoutY="161.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Username ID:" />
+      <Text fill="#fa8c17" layoutX="14.0" layoutY="191.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Password:" />
+      <TableView fx:id="TableViewUsers" layoutX="269.0" layoutY="34.0" prefHeight="365.0" prefWidth="420.0" style="-fx-background-color: cyan; -fx-border-color: #fa8c17; -fx-border-style: dashed;">
+        <columns>
+          <TableColumn fx:id="tableColumnID" prefWidth="41.6" text="ID" />
+          <TableColumn fx:id="tableColumnFirstName" prefWidth="92.8" text="First Name" />
+            <TableColumn fx:id="tableColumnLastName" prefWidth="109.6" text="Last Name" />
+            <TableColumn fx:id="tableColumnAge" prefWidth="40.8" text="Age" />
+            <TableColumn fx:id="tableColumnFavFood" prefWidth="131.2" text="Favourite Food" />
+        </columns>
+      </TableView>
+      <Text layoutX="269.0" layoutY="27.0" strokeType="OUTSIDE" strokeWidth="0.0" text="List of Users:" />
+   </children>
+</AnchorPane>
