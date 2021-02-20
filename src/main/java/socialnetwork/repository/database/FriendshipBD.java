@@ -1,138 +1,62 @@
 package socialnetwork.repository.database;
 
 import socialnetwork.domain.Friendship;
+import socialnetwork.domain.Message;
 import socialnetwork.domain.Tuple;
-import socialnetwork.domain.User;
-import socialnetwork.domain.validators.ValidationException;
 import socialnetwork.domain.validators.Validator;
-import socialnetwork.repository.file.AbstractFileRepository;
-import socialnetwork.repository.memory.InMemoryRepository;
 
 import java.sql.*;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.time.LocalDateTime;
 
-public class FriendshipBD extends InMemoryRepository<Tuple<Long,Long>, Friendship> {
-
-    private String url;
-    private String username;
-    private String password;
-    private Validator<Friendship> validator;
-
+public class FriendshipBD extends AbstractBDRepository<Tuple<Long,Long>, Friendship> {
     public FriendshipBD(String url, String username, String password, Validator<Friendship> validator) {
-        super(validator);
-        this.validator=validator;
-        this.url = url;
-        this.username = username;
-        this.password = password;
-    }
-
-    /**
-     *  extract entity  - template method design pattern
-     *  creates an entity of type E having a specified list of @code attributes
-     * @param attributes  the parts of the entity
-     * @return an entity of type E
-     */
-    @Override
-    public Friendship findOne(Tuple<Long,Long> id) {
-
-        if (id==null)
-            throw new ValidationException("id must not be null");
-
-        try (Connection connection = DriverManager.getConnection(url, username, password)){
-
-            PreparedStatement statement = connection.prepareStatement("SELECT * from friendships where id1 = ?,id2 = ?");
-            statement.setLong(1,id.getLeft());
-            statement.setLong(2,id.getRight());
-            ResultSet resultSet = statement.executeQuery();
-
-            return extractEntity(resultSet);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+        super(url, username, password, validator);
     }
 
     @Override
-    public Iterable<Friendship> findAll() {
-        Set<Friendship> friendships = new HashSet<>();
-        try (Connection connection = DriverManager.getConnection(url, username, password);
-             PreparedStatement statement = connection.prepareStatement("SELECT * from friendships");
-             ResultSet resultSet = statement.executeQuery()) {
-
-            while (resultSet.next()) {
-                Friendship entity = extractEntity(resultSet);
-                friendships.add(entity);
-            }
-            return friendships;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return friendships;
+    protected String findOneQuery(Tuple<Long, Long> id) {
+        return "SELECT * from friendships WHERE id1 = " + id.getLeft() + " AND id2 = " + id.getRight();
     }
+
+
+
     @Override
-    public Friendship save(Friendship entity) {
-        if (entity==null)
-            throw new ValidationException("entity must not be null");
-        validator.validate(entity);
-
-        try (Connection connection = DriverManager.getConnection(url, username, password)) {
-
-            String query = " INSERT INTO friendships (id1, id2)" + " values (?, ?)";
-            PreparedStatement statement = connection.prepareStatement(query);
-            statement.setLong(1, entity.getId1());
-            statement.setLong(2, entity.getId2());
-            statement.execute();
-            return null;
-
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return entity;
+    protected Friendship createEntity(ResultSet resultSet) throws SQLException {
+        String id1 = resultSet.getString("id1");
+        String id2 = resultSet.getString("id2");
+        String date = resultSet.getString("date");
+        String status = resultSet.getString("status");
+        Friendship utilizator = new Friendship(Long.parseLong(id1),Long.parseLong(id2),LocalDateTime.parse(date),status);//,reply);
+        return utilizator;
     }
 
     @Override
-    public Friendship delete(Tuple<Long,Long> id) {
+    public String getOrder(){
+        return "friendships.id1, friendships.id2";
+    }
 
-        if (id==null)
-            throw new ValidationException("id must be not null");
-
-        try (Connection connection = DriverManager.getConnection(url, username, password)) {
-
-            Friendship friendship = findOne(id);
-            if( friendship == null)
-                return null;
-
-            String query = " DELETE FROM friendships WHERE id1 = ?,id2 = ?";
-            PreparedStatement statement = connection.prepareStatement(query);
-            statement.setLong(1, id.getLeft());
-            statement.setLong(2, id.getRight());
-            statement.execute();
-
-            return friendship;
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+    @Override
+    protected String getTableName() {
+        return "friendships";
     }
 
 
-    public Friendship extractEntity(ResultSet resultSet) {
-     /*   try {
-            if(!resultSet.next())
-                return null;
 
-            Long id1 = resultSet.getLong("id1");
-            Long id2 = resultSet.getLong("id2");
-            return new Friendship(id1, id2);
-        }
-        catch (SQLException throwables) {
-            throwables.printStackTrace();
-            return null;
-        }*/
-        return null;
+
+    @Override
+    protected PreparedStatement addQuery(Friendship entity, Connection connection) throws SQLException {
+        return connection.prepareStatement("INSERT INTO friendships(id1,id2,date,status) VALUES ("
+                + entity.getId1() +","+entity.getId2()+",'"
+                +entity.getDate() +"','"+entity.getStatus()+ "')");
+    }
+
+    @Override
+    protected PreparedStatement delQuery(Tuple<Long, Long> id, Connection connection) throws SQLException {
+        return connection.prepareStatement("DELETE FROM friendships WHERE id1 = "+id.getLeft().toString() + " AND id2 = " + id.getRight().toString());
+    }
+
+    @Override
+    protected PreparedStatement updateQuery(Friendship entity, Connection connection) throws SQLException {
+        return connection.prepareStatement("UPDATE  friendships SET status = "+entity.getStatus() +" WHERE id1 = "+entity.getId1() + " AND id2 = " + entity.getId2());
     }
 }

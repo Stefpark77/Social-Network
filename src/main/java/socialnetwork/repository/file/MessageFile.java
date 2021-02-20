@@ -13,6 +13,12 @@ public class MessageFile  extends AbstractFileRepository<Long, Message>{
         super(fileName, validator);
     }
 
+    /**
+     *  extract entity  - template method design pattern
+     *  creates an entity of type E having a specified list of @code attributes
+     * @param attributes the parts of the entity
+     * @return an entity of type E
+     */
     @Override
     public Message extractEntity(List<String> attributes) {
         Long id = Long.parseLong(attributes.get(0));//ID
@@ -26,18 +32,39 @@ public class MessageFile  extends AbstractFileRepository<Long, Message>{
         String type=attributes.get(4);//TYPE
 
         LocalDateTime time = LocalDateTime.parse(attributes.get(5));//DATE
+        try{
+            String reply=attributes.get(6);//REPLY
+            Message mesg = new Message(from_id,to_id,message,type,time,reply);
+            mesg.setId(id);
+            return mesg;
+        }catch(Exception e){
 
-        Message mesg = new Message(from_id,to_id,message,type,time);
-        mesg.setId(id);
-        return mesg;
+            Message mesg = new Message(from_id,to_id,message,type,time);
+            mesg.setId(id);
+            return mesg;
+        }
     }
 
+    /**
+     * gives the entity in form of a string
+     * @param entity
+     *         entity must be not null
+     * @return the entity in from of a string
+     */
     @Override
     protected String createEntityAsString(Message entity) {
-        if(entity.getType()==Messagetype.groupmessage)
-            return String.valueOf(entity.getId()) + ";" + entity.getFrom_id() + ';' + entity.getTo_id() +';' +entity.getMessage() + ';' + "groupmessage" + ';' + entity.getDate();
-        if(entity.getType()==Messagetype.privatemessage)
-            return String.valueOf(entity.getId()) + ";" + entity.getFrom_id() + ';' + entity.getTo_id() +';' +entity.getMessage() + ';' + "privatemessage" + ';' + entity.getDate();
-        return "";
+        if(entity.getReply()==null) {
+            if (entity.getType() == Messagetype.groupmessage)
+                return String.valueOf(entity.getId()) + ";" + entity.getFrom_id() + ';' + entity.getTo_id() + ';' + entity.getMessage() + ';' + "groupmessage" + ';' + entity.getDate();
+            if (entity.getType() == Messagetype.privatemessage)
+                return String.valueOf(entity.getId()) + ";" + entity.getFrom_id() + ';' + entity.getTo_id() + ';' + entity.getMessage() + ';' + "privatemessage" + ';' + entity.getDate();
+            return "";
+        }else{
+            if (entity.getType() == Messagetype.groupmessage)
+                return String.valueOf(entity.getId()) + ";" + entity.getFrom_id() + ';' + entity.getTo_id() + ';' + entity.getMessage() + ';' + "groupmessage" + ';' + entity.getDate() + ';' + entity.getReply();
+            if (entity.getType() == Messagetype.privatemessage)
+                return String.valueOf(entity.getId()) + ";" + entity.getFrom_id() + ';' + entity.getTo_id() + ';' + entity.getMessage() + ';' + "privatemessage" + ';' + entity.getDate() + ';' + entity.getReply();
+            return "";
+        }
     }
 }

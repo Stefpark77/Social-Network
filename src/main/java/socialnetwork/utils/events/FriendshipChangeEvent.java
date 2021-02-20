@@ -2,7 +2,7 @@ package socialnetwork.utils.events;
 
 import socialnetwork.domain.Friendship;
 
-public class FriendshipChangeEvent implements utils.events.Event {
+public class FriendshipChangeEvent implements socialnetwork.utils.events.Event {
     private ChangeEvent type;
     private Friendship data, oldData;
 

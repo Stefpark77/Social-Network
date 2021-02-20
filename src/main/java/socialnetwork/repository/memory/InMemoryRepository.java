@@ -4,6 +4,10 @@ import socialnetwork.domain.Entity;
 import socialnetwork.domain.validators.ValidationException;
 import socialnetwork.domain.validators.Validator;
 import socialnetwork.repository.Repository;
+import socialnetwork.repository.paging.Page;
+import socialnetwork.repository.paging.Pageable;
+import socialnetwork.repository.paging.Paginator;
+import socialnetwork.repository.paging.PagingRepository;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +16,7 @@ import java.util.Map;
  * @param <ID> - type E must have an attribute of type ID
  * @param <E> -  type of entities saved in repository
  */
-public class InMemoryRepository<ID, E extends Entity<ID>> implements Repository<ID,E> {
+public class InMemoryRepository<ID, E extends Entity<ID>> implements PagingRepository<ID,E> {
 
     private Validator<E> validator;
     Map<ID,E> entities;
@@ -116,4 +120,9 @@ public class InMemoryRepository<ID, E extends Entity<ID>> implements Repository<
 
     }
 
+    @Override
+    public Page<E> findAll(Pageable pageable) {
+        Paginator<E> paginator = new Paginator<E>(pageable, this.findAll());
+        return paginator.paginate();
+    }
 }

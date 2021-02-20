@@ -8,6 +8,8 @@ public class User extends Entity<Long>{
     private String lastName;
     private String age;
     private String favouriteFood;
+    private String email;
+    private String password;
     private List<User> friends;
 
     public User(String firstName, String lastName, String age, String favouriteFood) {
@@ -17,6 +19,14 @@ public class User extends Entity<Long>{
         this.favouriteFood = favouriteFood;
     }
 
+    public User(String firstName, String lastName,String email,String password, String age, String favouriteFood) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email=email;
+        this.password=password;
+        this.age = age;
+        this.favouriteFood = favouriteFood;
+    }
     public User() {
 
     }
@@ -31,6 +41,22 @@ public class User extends Entity<Long>{
 
     public String getFavouriteFood() {
         return favouriteFood;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String age) {
+        this.email = age;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String age) {
+        this.password = age;
     }
 
     public void setFavouriteFood(String favouriteFood) {
@@ -59,7 +85,7 @@ public class User extends Entity<Long>{
 
     @Override
     public String toString() {
-        return "Name=" + firstName + ' ' + lastName + ';' + "(ID:" + getId() + ", Age: " + age + " ,Favourite Food: "+ favouriteFood +")";
+        return "Name=" + firstName + ' ' + lastName + ';' + "(ID:" + getId() + " Email:" + getEmail() + ", Age: " + age + " ,Favourite Food: "+ favouriteFood +")";
     }
 
     public void addFriend(User u){

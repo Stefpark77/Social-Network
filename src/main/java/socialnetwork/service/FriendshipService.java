@@ -3,6 +3,7 @@ package socialnetwork.service;
 import socialnetwork.domain.Friendship;
 import socialnetwork.domain.Tuple;
 import socialnetwork.domain.User;
+import socialnetwork.domain.UserDTO;
 import socialnetwork.domain.validators.FriendshipValidator;
 import socialnetwork.domain.validators.ValidationException;
 import socialnetwork.repository.Repository;
@@ -10,7 +11,7 @@ import socialnetwork.utils.events.ChangeEvent;
 import socialnetwork.utils.events.FriendshipChangeEvent;
 import socialnetwork.utils.observer.Observable;
 import socialnetwork.utils.observer.Observer;
-import utils.events.Event;
+import socialnetwork.utils.events.Event;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -129,7 +130,9 @@ public class FriendshipService implements Observable<FriendshipChangeEvent> {
             }
         }
         for(Long id2:de_sters){
-            removeFriendshipNumeric(id,id2);
+            if (id2 != null) {
+                removeFriendshipNumeric(id,id2);
+            }
         }
     }
 
@@ -215,7 +218,55 @@ public class FriendshipService implements Observable<FriendshipChangeEvent> {
         return repo.findAll();
     }
 
+    public List<Friendship> getAllFriends() {
+        return StreamSupport.stream(repo.findAll().spliterator(),false).collect(Collectors.toList());
+    }
 
+    public List<UserDTO> getFriendsListUser(Long id,UserService user_crt) {
+        return StreamSupport.stream(getAll().spliterator(),false)
+                .filter(c -> c.getId1() == id || c.getId2() == id)
+                .filter(c -> c.getStatus().equals("approved"))
+                .map(c-> {
+                    User u;
+                    if(c.getId1() == id){
+                        u=user_crt.getUser(String.valueOf(c.getId2()));
+                    }else{
+                        u=user_crt.getUser(String.valueOf(c.getId1()));
+                    }
+                    UserDTO udto =new UserDTO(u.getFirstName(),u.getLastName(),u.getAge(),u.getFavouriteFood(),c.getDate());
+                    udto.setId(u.getId());
+                    return udto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    public List<UserDTO> getRequestListUser(Long id,UserService user_crt) {
+        return StreamSupport.stream(getAll().spliterator(),false)
+                .filter(c -> c.getId2() == id)
+                .filter(c -> c.getStatus().equals("pending"))
+                .map(c-> {
+                    User u =user_crt.getUser(String.valueOf(c.getId1()));
+                    UserDTO udto =new UserDTO(u.getFirstName(),u.getLastName(),u.getAge(),u.getFavouriteFood(),c.getDate());
+                    udto.setId(u.getId());
+                    udto.setStatus(c.getStatus());
+                    return udto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    public List<UserDTO> getSentRequestListUser(Long id,UserService user_crt) {
+        return StreamSupport.stream(getAll().spliterator(),false)
+                .filter(c -> c.getId1() == id)
+                .filter(c -> c.getStatus().equals("pending"))
+                .map(c-> {
+                    User u =user_crt.getUser(String.valueOf(c.getId2()));
+                    UserDTO udto =new UserDTO(u.getFirstName(),u.getLastName(),u.getAge(),u.getFavouriteFood(),c.getDate());
+                    udto.setId(u.getId());
+                    udto.setStatus(c.getStatus());
+                    return udto;
+                })
+                .collect(Collectors.toList());
+    }
 
     @Override
     public void addObserver(Observer<FriendshipChangeEvent> e) {
@@ -229,7 +280,6 @@ public class FriendshipService implements Observable<FriendshipChangeEvent> {
 
     @Override
     public void notifyObservers(FriendshipChangeEvent t) {
-        observers.stream()
-                .forEach(x->x.update(t));
+        observers.stream().forEach(x->x.update(t));
     }
 }

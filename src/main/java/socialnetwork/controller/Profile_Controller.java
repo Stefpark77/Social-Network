@@ -52,11 +52,13 @@ public class Profile_Controller  implements Observer<FriendshipChangeEvent> {
         RequestsDate.setCellValueFactory(new PropertyValueFactory<UserDTO, LocalDateTime>("date"));
         RequestsFirstName.setCellValueFactory(new PropertyValueFactory<UserDTO, String>("firstName"));
         RequestsLastName.setCellValueFactory(new PropertyValueFactory<UserDTO, String>("lastName"));
+        RFRStatusColumn.setCellValueFactory(new PropertyValueFactory<UserDTO, String>("status"));
 
         SentRequestsTable.setItems(modelGrade3);
         SRequestsDate.setCellValueFactory(new PropertyValueFactory<UserDTO, LocalDateTime>("date"));
         SRequestsFirstName.setCellValueFactory(new PropertyValueFactory<UserDTO, String>("firstName"));
         SRequestsLastName.setCellValueFactory(new PropertyValueFactory<UserDTO, String>("lastName"));
+        SFRStatusColumn.setCellValueFactory(new PropertyValueFactory<UserDTO, String>("status"));
     }
 
     private List<UserDTO> getFriendsListUser(Long id) {
@@ -85,6 +87,7 @@ public class Profile_Controller  implements Observer<FriendshipChangeEvent> {
                     User u =user_crt.getUser(String.valueOf(c.getId1()));
                     UserDTO udto =new UserDTO(u.getFirstName(),u.getLastName(),u.getAge(),u.getFavouriteFood(),c.getDate());
                     udto.setId(u.getId());
+                    udto.setStatus(c.getStatus());
                     return udto;
                 })
                 .collect(Collectors.toList());
@@ -98,6 +101,7 @@ public class Profile_Controller  implements Observer<FriendshipChangeEvent> {
                     User u =user_crt.getUser(String.valueOf(c.getId2()));
                     UserDTO udto =new UserDTO(u.getFirstName(),u.getLastName(),u.getAge(),u.getFavouriteFood(),c.getDate());
                     udto.setId(u.getId());
+                    udto.setStatus(c.getStatus());
                     return udto;
                 })
                 .collect(Collectors.toList());
@@ -205,7 +209,7 @@ public class Profile_Controller  implements Observer<FriendshipChangeEvent> {
             ctrl.setService(user_crt,messagecrt,groupcrt,u);
 
             Stage stage=new Stage();
-            stage.setScene(new Scene(root, 600, 540));
+            stage.setScene(new Scene(root, 650, 540));
             stage.setTitle("Messages of User " + u.getLastName() + " " + u.getFirstName());
             ctrl.setPrimaryStage(stage);
             stage.show();
@@ -222,6 +226,28 @@ public class Profile_Controller  implements Observer<FriendshipChangeEvent> {
         primaryStage.close();
     }
 
+
+    @FXML
+    void handleReports(ActionEvent event) {
+        try {
+            FXMLLoader loader=new FXMLLoader();
+            loader.setLocation(getClass().getResource("/views/Reports.fxml"));
+            AnchorPane root=loader.load();
+
+            Report_Controller ctrl=loader.getController();
+            ctrl.setService(user_crt,friendscrt,messagecrt,groupcrt,String.valueOf(u.getId()));
+
+            Stage stage=new Stage();
+            stage.setScene(new Scene(root, 620, 390));
+            stage.setTitle("Reports for User " + u.getLastName() + " " + u.getFirstName());
+            ctrl.setPrimaryStage(stage);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ValidationException | IllegalArgumentException e){
+            Allert_Controller.showErrorMessage(null,e.getMessage());
+        }
+    }
 
     @FXML
     private TableView<UserDTO> FRequestsTable;
@@ -294,7 +320,16 @@ public class Profile_Controller  implements Observer<FriendshipChangeEvent> {
 
     @FXML
     private Button MessagesButton;
+
     @FXML
     private Button RemoveFriendshipButton;
 
+    @FXML
+    private TableColumn<UserDTO, String> RFRStatusColumn;
+
+    @FXML
+    private TableColumn<UserDTO, String> SFRStatusColumn;
+
+    @FXML
+    private Button ReportsButton;
 }

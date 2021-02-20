@@ -44,8 +44,8 @@ public class UserService {
      * @throws ValidationException
      *            if the params are invalid
      */
-    public User addUser(String firstname,String lastname,String age,String fav_food) {
-        User new_user=new User(firstname,lastname,age,fav_food);
+    public User addUser(String firstname,String lastname,String email,String password, String age,String fav_food) {
+        User new_user=new User(firstname,lastname,email,password,age,fav_food);
         new_user.setId(getNewId());
         return repo.save(new_user);
     }
@@ -91,6 +91,13 @@ public class UserService {
         UserValidator.idValidate(id);
         User u=repo.findOne(Long.parseLong(id));
         return u;
+    }
+    public User getUserEmail(String email){
+        for(User u:getAll()){
+            if(u.getEmail().equals(email))
+                return u;
+        }
+        return null;
     }
     /**
      * @return all entities

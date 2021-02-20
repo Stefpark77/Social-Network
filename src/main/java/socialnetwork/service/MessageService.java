@@ -1,24 +1,27 @@
 package socialnetwork.service;
 
+import socialnetwork.domain.Friendship;
 import socialnetwork.domain.Message;
 import socialnetwork.domain.Messagetype;
 import socialnetwork.domain.validators.MessageValidator;
 import socialnetwork.domain.validators.ValidationException;
 import socialnetwork.repository.Repository;
 import socialnetwork.utils.events.ChangeEvent;
-import socialnetwork.utils.events.MessageorGroupChangeEvent;
+import socialnetwork.utils.events.MessageGChangeEvent;
 import socialnetwork.utils.observer.Observable;
 import socialnetwork.utils.observer.Observer;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
-public class MessageService implements Observable<MessageorGroupChangeEvent> {
+public class MessageService implements Observable<MessageGChangeEvent> {
     private UserService user_crt;
     private FriendshipService friends_crt;
     private Repository<Long, Message> repo;
-    private List<Observer<MessageorGroupChangeEvent>> observers=new ArrayList<>();
+    private List<Observer<MessageGChangeEvent>> observers=new ArrayList<>();
 
     public MessageService(Repository<Long, Message> repo, UserService user_crt, FriendshipService friends_crt) {
         this.repo = repo;
@@ -56,43 +59,18 @@ public class MessageService implements Observable<MessageorGroupChangeEvent> {
         Message mess=new Message(Long.parseLong(id_from_s),Long.parseLong(id_to_s),message,type,LocalDateTime.now());
         mess.setId(getNewId());
         Message rez=repo.save(mess);
-        notifyObservers(new MessageorGroupChangeEvent(ChangeEvent.ADD,rez));
+        notifyObservers(new MessageGChangeEvent(ChangeEvent.ADD,rez));
         return rez;
     }
-
-    /**
-     * reply in a group chat
-     * @param id_from_s the id of the User who wants to reply
-     * @param id_group the id of the Group Chat
-     * @param message the reply of the User
-     * @return the the Group Chat with the new reply
-     * @throws ValidationException
-     *            if the params are invalid
-     *//*
-    public Message respondGroupchat(String id_from_s,String id_group, String message){
-        Long id_aux;
-        User from_aux=new User();
-        List<User> to_aux=new ArrayList<>();
-        Message mess=new Message();
-        for(Message msg : getAll()){
-            if(msg.getId()==Long.parseLong(id_group)){
-                id_aux = msg.getId();
-                from_aux=msg.getFrom();
-                String m = msg.getMessage();
-                String r = msg.getReply();//it works ,dont touch it!
-
-                repo.delete(id_aux);//le stergem
-
-                mess = new Message(from_aux,msg.getTo(),m+"*",r+"*"+id_from_s+":"+message);
-                mess.setDate(LocalDateTime.now());
-                mess.setId(id_aux);//le inlocuim
-                break;
-            }
-        }//Update Existing Chat
+    public Message addMessage(String id_from_s, String id_to_s, String message, String type, String reply) {
+        MessageValidator.idValidate(id_from_s);
+        MessageValidator.idValidate(id_to_s);
+        Message mess=new Message(Long.parseLong(id_from_s),Long.parseLong(id_to_s),message,type,LocalDateTime.now(),reply);
+        mess.setId(getNewId());
         Message rez=repo.save(mess);
-        notifyObservers(new MessageChangeEvent());
+        notifyObservers(new MessageGChangeEvent(ChangeEvent.ADD,rez));
         return rez;
-    }*/
+    }
 
     /**
      * get the conversation beetween two users(by their ip)
@@ -113,7 +91,12 @@ public class MessageService implements Observable<MessageorGroupChangeEvent> {
                 if(msg!=null){
                     if(String.valueOf(msg.getTo_id()).equals(id2) && msg.getType()==Messagetype.groupmessage){
                         String id1m=String.valueOf(msg.getFrom_id());
-                        Conversation.add(user_crt.getUser(id1m).getFirstName() + " " +user_crt.getUser(id1m).getLastName() + ": " + msg.getMessage());
+                        if(msg.getReply()!=null){
+                            Conversation.add("Reply to: " + msg.getReply());
+                            Conversation.add("(" + String.valueOf(msg.getDate().getHour())+":"+String.valueOf(msg.getDate().getMinute())+ ")" +user_crt.getUser(id1m).getFirstName() + " " +user_crt.getUser(id1m).getLastName() + ": " + msg.getMessage());
+                        }else{
+                            Conversation.add("(" + String.valueOf(msg.getDate().getHour())+":"+String.valueOf(msg.getDate().getMinute())+ ")" +user_crt.getUser(id1m).getFirstName() + " " +user_crt.getUser(id1m).getLastName() + ": " + msg.getMessage());
+                        }
                     }
                 }
             }
@@ -121,17 +104,62 @@ public class MessageService implements Observable<MessageorGroupChangeEvent> {
             for(Message msg : getAll()){
                 if(msg!=null){
                     if(String.valueOf(msg.getTo_id()).equals(id2) && String.valueOf(msg.getFrom_id()).equals(id1) && msg.getType()==Messagetype.privatemessage){
-                        Conversation.add(user_crt.getUser(id1).getFirstName() + " " +user_crt.getUser(id1).getLastName() + ": " + msg.getMessage());
+                        if(msg.getReply()!=null){
+                            Conversation.add("Reply to: " + msg.getReply());
+                            Conversation.add("(" + String.valueOf(msg.getDate().getHour())+":"+String.valueOf(msg.getDate().getMinute())+ ")" + user_crt.getUser(id1).getFirstName() + " " +user_crt.getUser(id1).getLastName() + ": " + msg.getMessage());
+                        }else
+                            Conversation.add("(" + String.valueOf(msg.getDate().getHour())+":"+String.valueOf(msg.getDate().getMinute())+ ")" + user_crt.getUser(id1).getFirstName() + " " +user_crt.getUser(id1).getLastName() + ": " + msg.getMessage());
                     }
                     if(String.valueOf(msg.getTo_id()).equals(id1) && String.valueOf(msg.getFrom_id()).equals(id2)&& msg.getType()==Messagetype.privatemessage){
-                        Conversation.add(user_crt.getUser(id2).getFirstName() + " " +user_crt.getUser(id2).getLastName() + ": " + msg.getMessage());
+                        if(msg.getReply()!=null){
+                            Conversation.add("Reply to: " + msg.getReply());
+                            Conversation.add("(" + String.valueOf(msg.getDate().getHour())+":"+String.valueOf(msg.getDate().getMinute())+ ")" + user_crt.getUser(id2).getFirstName() + " " +user_crt.getUser(id2).getLastName() + ": " + msg.getMessage());
+                        }else
+                            Conversation.add("(" + String.valueOf(msg.getDate().getHour())+":"+String.valueOf(msg.getDate().getMinute())+ ")" + user_crt.getUser(id2).getFirstName() + " " +user_crt.getUser(id2).getLastName() + ": " + msg.getMessage());
                     }
                 }
             }
         }
         return Conversation;
     }
-
+    /**
+     * removes a message
+     * @param id_de_sters
+     *          must not be null
+     * @return Message
+     *          if the Message was removed succesfully
+     * @throws ValidationException
+     *            if the id_to_remove is invalid
+     */
+    public Message RemoveMessage(Long id_de_sters){
+        Message rez=repo.delete(id_de_sters);
+        notifyObservers(new MessageGChangeEvent(ChangeEvent.DELETE,rez));
+        return rez;
+    }
+    /**
+     * removes all messages from a specific group
+     * @param group_id
+     *          must not be null
+     * @throws ValidationException
+     *            if the group_id is invalid
+     */
+    public void deleteAllGroupMessage(Long group_id){
+        Iterable<Message> messages=getAll();
+        Long[] de_sters=new Long[1000];
+        int index=0;
+        for(Message m:messages){
+            if(m.getType() == Messagetype.groupmessage){
+                if(m.getTo_id().equals(group_id)){
+                    de_sters[index++]=m.getId();
+                }
+            }
+        }
+        for(Long id_de_sters:de_sters){
+            if(id_de_sters!=null){
+                RemoveMessage(id_de_sters);
+            }
+        }
+    }
     /**
      * @return all entities
      */
@@ -139,18 +167,22 @@ public class MessageService implements Observable<MessageorGroupChangeEvent> {
         return repo.findAll();
     }
 
+    public List<Message> getAllMessages() {
+        return StreamSupport.stream(repo.findAll().spliterator(),false).collect(Collectors.toList());
+    }
+
     @Override
-    public void addObserver(Observer<MessageorGroupChangeEvent> e) {
+    public void addObserver(Observer<MessageGChangeEvent> e) {
         observers.add(e);
     }
 
     @Override
-    public void removeObserver(Observer<MessageorGroupChangeEvent> e) {
+    public void removeObserver(Observer<MessageGChangeEvent> e) {
         observers.remove(e);
     }
 
     @Override
-    public void notifyObservers(MessageorGroupChangeEvent t) {
+    public void notifyObservers(MessageGChangeEvent t) {
         observers.stream()
                 .forEach(x->x.update(t));
     }

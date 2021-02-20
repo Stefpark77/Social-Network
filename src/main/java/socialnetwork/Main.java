@@ -18,23 +18,6 @@ import socialnetwork.service.UserService;
 
 public class Main {
     public static void main(String[] args) {
-        /*//files
-        String fileName_users=ApplicationContext.getPROPERTIES().getProperty("data.socialnetwork.users");
-        String fileName_friends=ApplicationContext.getPROPERTIES().getProperty("data.socialnetwork.friendships");
-        String fileName_messages=ApplicationContext.getPROPERTIES().getProperty("data.socialnetwork.messages");
-        //repository
-        Repository<Long, User> userFileRepository = new UserFile(fileName_users, new UserValidator());
-        Repository<Tuple<Long,Long>, Friendship> friendshipFileRepository= new FriendshipFile(fileName_friends, new FriendshipValidator());
-        Repository<Long, Message> messageFileRepository = new MessageFile(fileName_messages, new MessageValidator());
-        //services
-        UserService usercrt=new UserService(userFileRepository);
-        FriendshipService friendscrt=new FriendshipService(friendshipFileRepository);
-        MessageService messagecrt=new MessageService(messageFileRepository,usercrt,friendscrt);
-        //UI start:
-        //UI ui=new UI(usercrt,friendscrt,messagecrt);
-        //ui.run();
-
-        //GUI start:*/
         MainFX.main(args);
     }
 }

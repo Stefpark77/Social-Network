@@ -1,27 +1,54 @@
-1;1;6;ceva;privatemessage;2020-12-09T01:40:03.554903100
-2;6;1;altceva;privatemessage;2020-12-09T01:40:06.737865900
-3;1;6;oare;privatemessage;2020-12-09T01:40:09.842340300
-4;1;6;merge???;privatemessage;2020-12-09T01:40:12.621242200
-5;1;6;ceva iara sa verific;privatemessage;2020-12-09T17:02:03.473602300
-6;6;1;deci merge right?;privatemessage;2020-12-09T17:02:09.803720100
-7;1;1;de ce...;groupmessage;2020-12-09T17:09:01.547685900
-8;3;1;oare...;groupmessage;2020-12-09T17:09:19.163107
-9;1;1;ba sper ca amu merge;groupmessage;2020-12-09T17:13:37.824495300
-10;1;1;like am pus sa verifice daca e grup;groupmessage;2020-12-09T17:13:44.412306
-11;1;3;iti trimit mesaj si aicia sa vad;privatemessage;2020-12-09T17:14:02.873783800
-12;3;1;da merge man;privatemessage;2020-12-09T17:14:19.803980600
-13;3;1;eu chiar cred ca emrge,nu ti fa griji;groupmessage;2020-12-09T17:14:35.762644500
-14;4;1;amu merge si asta,wow =));groupmessage;2020-12-09T17:15:56.001466400
-15;4;1;adasd;groupmessage;2020-12-09T17:16:24.989154900
-16;4;1;asd;groupmessage;2020-12-09T17:16:25.869448200
-17;1;1;sadas;groupmessage;2020-12-09T17:16:27.479302
-18;1;1;asd;groupmessage;2020-12-09T17:16:28.566021300
-19;3;1;asbrtr;groupmessage;2020-12-09T17:16:31.082482100
-20;3;1;rtgrtg;groupmessage;2020-12-09T17:16:32.416033900
-21;4;2;hehe;groupmessage;2020-12-09T17:17:34.674662700
-22;1;2;-left the Group;groupmessage;2020-12-09T17:31:49.571627900
-23;7;2;oh no...;groupmessage;2020-12-09T17:31:57.669662800
-24;7;2;si eu ies atuncia...;groupmessage;2020-12-09T17:32:04.162949200
-25;7;2;-left the Group;groupmessage;2020-12-09T17:32:08.555914900
-26;4;2;noh bine...;groupmessage;2020-12-09T17:32:30.248932400
-27;4;2;-left the Group;groupmessage;2020-12-09T17:32:32.840620900
+4;4;1;Hei!;privatemessage;2020-12-10T00:38:04.258237800
+5;1;4;Hi;privatemessage;2020-12-10T00:38:07.640458700
+6;4;1;Wanna hang out this weekend?;privatemessage;2020-12-10T00:38:14.411823100
+7;1;4;*Generic Excuse*;privatemessage;2020-12-10T00:38:29.118520100
+8;4;1;Did you just say generic excuse?;privatemessage;2020-12-10T00:38:40.318354800
+9;1;1;ceva de test;groupmessage;2020-12-10T17:36:55.481033400
+10;3;1;altceva de test;groupmessage;2020-12-10T17:37:20.903237800
+11;1;7;cevanou;privatemessage;2020-12-10T18:22:46.501527
+12;7;1;altceva nou;privatemessage;2020-12-10T18:23:01.615324100
+14;3;1;Test de stres;privatemessage;2020-12-10T19:36:17.157864200
+15;1;3;ye merge in continuare;privatemessage;2020-12-10T19:36:27.702074800
+16;3;1;yay;privatemessage;2020-12-10T19:36:30.508761500
+17;3;1;ceva;groupmessage;2020-12-10T19:38:48.267992700
+18;1;4;-left the Group;groupmessage;2020-12-10T19:39:34.253937
+19;3;4;-left the Group;groupmessage;2020-12-10T19:39:55.170703400
+20;8;1;I don't want a lot for Christmas;privatemessage;2020-12-25T00:00:00.942374800
+21;8;1;There is just one thing I need;privatemessage;2020-12-25T00:00:35.183288600
+22;8;1;I don't care about the presents;privatemessage;2020-12-25T00:00:38.475302600
+23;8;1;Underneath the Christmas tree;privatemessage;2020-12-25T00:00:41.733236100
+24;8;1;I just want you for my own;privatemessage;2020-12-25T00:00:47.794989900
+25;8;1;More than you could ever know;privatemessage;2020-12-25T00:00:52.032561700
+26;8;1;Make my wish come true;privatemessage;2020-12-25T00:00:55.061709400
+27;8;1;All I want for Christmas is you, yeah;privatemessage;2020-12-25T00:00:57.942684300
+28;8;1;I don't want a lot for Christmas;privatemessage;2020-12-25T00:00:26.236245
+29;8;1;There is just one thing I need;privatemessage;2020-12-25T00:00:28.787705500
+30;8;1;And I don't care about the presents;privatemessage;2020-12-25T00:00:31.036015200
+31;8;1;Underneath the Christmas tree;privatemessage;2020-12-25T00:00:33.579977
+32;8;1;I don't need to hang my stocking;privatemessage;2020-12-25T00:00:42.407271100
+33;8;1;There upon the fireplace;privatemessage;2020-12-25T00:00:45.087787800
+34;8;1;Santa Claus won't make me happy;privatemessage;2020-12-25T00:00:47.851592300
+35;8;1;With a toy on Christmas Day;privatemessage;2020-12-25T00:00:50.609125100
+36;8;1;I just want you for my own;privatemessage;2020-12-25T00:00:53.713591400
+37;8;1;More than you could ever know;privatemessage;2020-12-25T00:00:57.320432200
+38;8;1;Make my wish come true;privatemessage;2020-12-25T00:00:00.612787600
+39;8;1;All I want for Christmas is you;privatemessage;2020-12-25T00:00:04.161258500
+40;3;4;hello!;privatemessage;2020-12-20T20:34:41.997137900
+41;4;3;hi!;privatemessage;2020-12-20T20:34:50.015385100
+42;1;5;ceva;privatemessage;2020-12-22T21:22:06.319011200
+43;1;5;merge sa dai si cu enter acum!;privatemessage;2020-12-22T21:22:21.426020700
+44;7;5;ceva sa testez iara;privatemessage;2021-01-03T20:50:07.450856100
+45;7;5;amu sper ca merge;privatemessage;2021-01-03T20:53:02.129140500
+46;5;7;yep merge;privatemessage;2021-01-03T20:53:05.662745700
+47;7;3;primu message here;groupmessage;2021-01-03T20:53:15.528957100
+48;5;3;yay;groupmessage;2021-01-03T20:53:18.991788800
+49;5;8;sahdbash \n aosndash;privatemessage;2021-01-03T20:57:21.152773
+50;5;5;asdasdasd;groupmessage;2021-01-04T13:35:09.096616200
+51;5;5;qedqwd;groupmessage;2021-01-04T13:35:13.641662800
+52;7;7;hmmm;groupmessage;2021-01-04T13:39:18.940834100
+53;5;8;wefsfdasd;privatemessage;2021-01-04T14:42:48.668098400
+54;5;8;xdsdfsdf \n sddnjsdnc;privatemessage;2021-01-04T14:42:55.828485800
+55;5;8;dsfsd;groupmessage;2021-01-06T20:17:38.043796700
+56;1;3;ceva;privatemessage;2021-01-07T00:25:41.069502
+57;1;3;sdfasdvsdv;privatemessage;2021-01-07T00:32:49.490897
+58;5;1;salut;privatemessage;2021-01-14T12:20:45.864014800

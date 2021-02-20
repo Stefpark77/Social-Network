@@ -1,6 +1,6 @@
 package socialnetwork.utils.events;
 
-public class UserChangeEvent implements utils.events.Event {
+public class UserChangeEvent implements socialnetwork.utils.events.Event {
     public UserChangeEvent() {
     }
 

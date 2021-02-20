@@ -17,18 +17,19 @@ public class UserValidator implements Validator<User> {
         if(!entity.getLastName().matches("[A-Z]+[a-z]*")){
             throw new ValidationException("the last name is invalid!(correct form: one letter from A to Z than any character from a to z)");
         }
-        Long age;
-        try{
-            age=Long.parseLong(entity.getAge());
-        }catch(NumberFormatException exp){
-            throw new ValidationException("The age is invalid!(the age needs to be a number greater than 0)");
-        }
-        if(age<=0){
-            throw new ValidationException("The age needs to be greater than 0!");
-        }
-        if(!entity.getFavouriteFood().matches("[a-z]+")){
-            throw new ValidationException("the favourite food is invalid!(correct form: one or more letters from a to z)");
-        }
+
+        if(!entity.getEmail().matches(".*@.*\\..*"))
+            throw new ValidationException("Incorrect email!");
+
+    }
+    public static void emailValidator(String email) throws ValidationException{
+        if(!email.matches(".*@.*\\..*"))
+            throw new ValidationException("Incorrect email!");
+    }
+
+    public static void passwordValidator(String pass, String cpass) throws ValidationException{
+        if(!pass.equals(cpass))
+            throw new ValidationException("Passwords don't match!");
     }
     /**
      * @param id_s -the id of the entity to be validated
@@ -110,5 +111,13 @@ public class UserValidator implements Validator<User> {
             }
         }
         throw new ValidationException("There is no User with that id!");
+    }
+
+    public static void mailExistenceValidate(String email,Iterable<User> users)throws ValidationException{
+        for(User u:users){
+            if(u.getEmail().equals(email)){
+                throw new ValidationException("There is already a account made on that email!");
+            }
+        }
     }
 }

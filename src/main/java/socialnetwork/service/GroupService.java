@@ -5,17 +5,19 @@ import socialnetwork.domain.validators.GroupValidator;
 import socialnetwork.domain.validators.ValidationException;
 import socialnetwork.repository.Repository;
 import socialnetwork.utils.events.ChangeEvent;
-import socialnetwork.utils.events.MessageorGroupChangeEvent;
+import socialnetwork.utils.events.MessageGChangeEvent;
 import socialnetwork.utils.observer.Observable;
 import socialnetwork.utils.observer.Observer;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
-public class GroupService implements Observable<MessageorGroupChangeEvent> {
+public class GroupService implements Observable<MessageGChangeEvent> {
     private Repository<Long, Group> repo;
-    private List<Observer<MessageorGroupChangeEvent>> observers=new ArrayList<>();
+    private List<Observer<MessageGChangeEvent>> observers=new ArrayList<>();
 
     public GroupService(Repository<Long, Group> repo) {
         this.repo = repo;
@@ -37,7 +39,7 @@ public class GroupService implements Observable<MessageorGroupChangeEvent> {
     }
 
     /**
-     * adds a new user
+     * adds a new group
      * @param name
      *          must be a string not null
      * @param ids
@@ -53,22 +55,35 @@ public class GroupService implements Observable<MessageorGroupChangeEvent> {
         Group new_group=new Group(ids,nr,name,LocalDateTime.now());
         new_group.setId(getNewId());
         Group rez=repo.save(new_group);
-        notifyObservers(new MessageorGroupChangeEvent(ChangeEvent.ADD,rez));
+        notifyObservers(new MessageGChangeEvent(ChangeEvent.ADD,rez));
         return rez;
     }
 
+    /**
+     * leave a group as a user
+     * @param id_group
+     *          must not be null
+     * @param id_user
+     *          must not be null
+     * @return Group
+     *          if the Group was left/removed succesfully
+     * @throws ValidationException
+     *            if the params are invalid
+     */
     public Group leaveGroup(String id_group,String id_user){
-        Group group_to_update;
+        Group group_to_update=new Group();
         for(Group g:getAll()){
             if(g.getId()==Long.parseLong(id_group)){
                 group_to_update=g;
                 for(Long id_index:g.getIds()){
                     if(id_index==Long.parseLong(id_user)){
                         g.getIds().remove(id_index);
-                        if(g.getIds().isEmpty()){
-                            group_to_update=removeGroup(id_group);
+                        g.setNumber_of_people(g.getNumber_of_people()-1);
+                        group_to_update=removeGroup(id_group);
+                        if(!g.getIds().isEmpty()){
+                            group_to_update=repo.save(g);
                         }
-                        notifyObservers(new MessageorGroupChangeEvent(ChangeEvent.UPDATE,group_to_update));
+                        notifyObservers(new MessageGChangeEvent(ChangeEvent.UPDATE,group_to_update));
                         return group_to_update;
                     }
                 }
@@ -78,18 +93,18 @@ public class GroupService implements Observable<MessageorGroupChangeEvent> {
 
     }
     /**
-     * removes a User
+     * removes a Group
      * @param id_to_remove
      *          must not be null
-     * @return User
-     *          if the User was removed succesfully
+     * @return Group
+     *          if the group was removed succesfully
      * @throws ValidationException
      *            if the id_to_remove is invalid
      */
     public Group removeGroup(String id_to_remove) {
         GroupValidator.idValidate(id_to_remove);
         Group rez=repo.delete(Long.parseLong(id_to_remove));
-        notifyObservers(new MessageorGroupChangeEvent(ChangeEvent.DELETE,rez));
+        notifyObservers(new MessageGChangeEvent(ChangeEvent.DELETE,rez));
         return rez;
     }
 
@@ -114,18 +129,24 @@ public class GroupService implements Observable<MessageorGroupChangeEvent> {
         return repo.findAll();
     }
 
+    public List<Group> getAllGroupsofUser(Long id){
+        return StreamSupport.stream(getAll().spliterator(),false)
+                .filter(c -> c.getIds().contains(id))
+                .collect(Collectors.toList());
+    }
+
     @Override
-    public void addObserver(Observer<MessageorGroupChangeEvent> e) {
+    public void addObserver(Observer<MessageGChangeEvent> e) {
         observers.add(e);
     }
 
     @Override
-    public void removeObserver(Observer<MessageorGroupChangeEvent> e) {
+    public void removeObserver(Observer<MessageGChangeEvent> e) {
         observers.remove(e);
     }
 
     @Override
-    public void notifyObservers(MessageorGroupChangeEvent t) {
+    public void notifyObservers(MessageGChangeEvent t) {
         observers.stream()
                 .forEach(x->x.update(t));
     }

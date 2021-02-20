@@ -1,148 +1,192 @@
 package socialnetwork.repository.database;
 
 import socialnetwork.domain.Entity;
-import socialnetwork.domain.User;
-import socialnetwork.domain.validators.FriendshipValidator;
 import socialnetwork.domain.validators.ValidationException;
 import socialnetwork.domain.validators.Validator;
-import socialnetwork.repository.memory.InMemoryRepository;
+import socialnetwork.repository.Repository;
+import socialnetwork.repository.paging.Page;
+import socialnetwork.repository.paging.Pageable;
+import socialnetwork.repository.paging.Paginator;
+import socialnetwork.repository.paging.PagingRepository;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-
-public abstract class AbstractBDRepository <ID, E extends Entity<ID>> extends InMemoryRepository<ID,E> {
-    private String url;
-    private String username;
-    private String password;
-    private Validator<E> validator;
+public abstract class AbstractBDRepository<ID, E extends Entity<ID>> implements PagingRepository<ID, E> {
+    protected String url;
+    protected String username;
+    protected String password;
+    protected Validator<E> validator;
 
     public AbstractBDRepository(String url, String username, String password, Validator<E> validator) {
-        super(validator);
-        this.validator=validator;
         this.url = url;
         this.username = username;
         this.password = password;
+        this.validator = validator;
     }
 
-   /* @Override
-    public E findOne(long id) {
 
-        if (id==null)
-            throw new ValidationException("id must not be null");
+    @Override
+    public E findOne(ID id) {
+        if (id == null)
+            throw new IllegalArgumentException("id must be not null");
 
-        try (Connection connection = DriverManager.getConnection(url, username, password)){
 
-            PreparedStatement statement = connection.prepareStatement("SELECT * from users where id = ?");
-            statement.setLong(1,id);
-            ResultSet resultSet = statement.executeQuery();
+        try (Connection connection = DriverManager.getConnection(url, username, password);
+             PreparedStatement statement = connection.prepareStatement(findOneQuery(id));
+             ResultSet resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                return createEntity(resultSet);
+            }
 
-            return extractEntity(resultSet);
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
-    }*/
+    }
 
-    /**
-     *  extract entity  - template method design pattern
-     *  creates an entity of type E having a specified list of @code attributes
-     * @param attributes  the parts of the entity
-     * @return an entity of type E
-     */
-   /* public abstract E extractEntity(ResultSet resultSet);
-    public abstract E createEntityasStatement(ResultSet resultSet);*/
+    protected abstract String findOneQuery(ID id);
 
 
-    /*@Override
+
+    @Override
     public Iterable<E> findAll() {
-        Set<E> entities = new HashSet<>();
+        List<E> entities = new ArrayList<E>();
         try (Connection connection = DriverManager.getConnection(url, username, password);
-             PreparedStatement statement = connection.prepareStatement("SELECT * from users");
+             PreparedStatement statement = connection.prepareStatement("SELECT * from "+getTableName()+" ORDER BY " + getOrder() + " ASC");
              ResultSet resultSet = statement.executeQuery()) {
-
+            //System.out.println(statement.toString());
             while (resultSet.next()) {
-                E entity = extractEntity(resultSet);
+                E entity=createEntity(resultSet);
                 entities.add(entity);
             }
             return entities;
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return entities;
-    }*/
+    }
 
-    /*@Override
+    public abstract String getOrder();
+
+    protected abstract E createEntity(ResultSet resultSet) throws SQLException;
+
+    protected abstract String getTableName();
+
+
+    //protected abstract Iterable<E> findAllQuery(Set<E> entities, Connection connection);
+
+    @Override
     public E save(E entity) {
-        if (entity==null)
-            throw new ValidationException("entity must not be null");
+        if (entity == null)
+            throw new ValidationException("Repository exception: id must be not null!\n");
+        //System.out.println(entity);
         validator.validate(entity);
-
-        try (Connection connection = DriverManager.getConnection(url, username, password)) {
-
-            String query = " INSERT INTO users (id, first_name, last_name, age, fav_food)" + " values (?, ?, ?, ?, ?)";
-            PreparedStatement statement = connection.prepareStatement(query);
-            statement.setLong(1, entity.getId());
-            statement.setString(2, entity.getFirstName());
-            statement.setString(3, entity.getLastName());
-            statement.execute();
-            return null;
-
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return entity;
-    }*/
-
-    /*@Override
-    public E delete(ID id) {
-
-        if (id==null)
-            throw new ValidationException("id must be not null");
-
-        try (Connection connection = DriverManager.getConnection(url, username, password)) {
-
-            E entity = findOne(id);
-            if( entity == null)
-                return null;
-
-            String query = " DELETE FROM users WHERE id = ?";
-            PreparedStatement statement = connection.prepareStatement(query);
-            statement.setLong(1, id);
-            statement.execute();
-
+        if (findOne(entity.getId()) != null) {
             return entity;
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }*/
+        } else {
+            try{
+                Connection connection = DriverManager.getConnection(url, username, password);
+                PreparedStatement statement = this.addQuery(entity, connection);
+                //System.out.println(statement.toString());
+                statement.execute();
+                //System.out.println("am executat");
 
-    /*@Override
-    public E update(E entity) {
-        if (entity==null)
-            throw new ValidationException("entity must be not null");
-        validator.validate(entity);
-
-        try (Connection connection = DriverManager.getConnection(url, username, password)) {
-
-            String query = " UPDATE users SET first_name = ?, last_name = ? where id = ?";
-            PreparedStatement statement = connection.prepareStatement(query);
-            statement.setString(1, entity.getFirstName());
-            statement.setString(2, entity.getLastName());
-            statement.setLong(3, entity.getId());
-            int nrRows = statement.executeUpdate();
-            if(nrRows == 0)
-                return entity;
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
             return null;
         }
-        catch (SQLException e) {
+    }
+
+    /**
+     * sql query for adding an entity
+     * @param entity- entity we want to add
+     * @param connection-connection established
+     * @return a statement
+     * @throws SQLException if sql query fails
+     */
+    protected abstract PreparedStatement addQuery(E entity, Connection connection) throws SQLException;
+
+    @Override
+    public E delete(ID id) {
+        if (id == null)
+            throw new ValidationException("Repository exception: id must be not null!\n");
+
+        try (Connection connection = DriverManager.getConnection(url, username, password);
+             PreparedStatement statement = delQuery(id, connection)) {
+            E entity = findOne(id);
+            statement.execute();
+            return entity;
+
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     *sql query for deleting an entity
+     * @param id-id of the user we want to delete
+     * @param connection-connection established
+     * @return a statement
+     * @throws SQLException if sql query fails
+     */
+    protected abstract PreparedStatement delQuery(ID id, Connection connection) throws SQLException;
+
+    @Override
+    public E update(E entity) {
+        if (entity == null)
+            throw new ValidationException("Repository exception: entity must be not null!");
+        validator.validate(entity);
+
+
+        if (findOne(entity.getId()) != null) {
+            try (Connection connection = DriverManager.getConnection(url, username, password);
+                 PreparedStatement statement = updateQuery(entity, connection)) {
+                statement.execute();
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        return entity;
+    }
+
+    /**
+     * sql query for updating an entity
+     * @param entity we want to update
+     * @param connection  connection established
+     * @return a statement
+     * @throws SQLException if sql query does not work
+     */
+    protected abstract PreparedStatement updateQuery(E entity, Connection connection) throws SQLException;
+
+/*    @Override
+    public  int size(){
+        try (Connection connection = DriverManager.getConnection(url, username, password);
+             PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) from "+getTableName())
+        ) {
+
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next())
+                return resultSet.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }*/
+
+    @Override
+    public Page<E> findAll(Pageable pageable) {
+        Paginator<E> paginator = new Paginator<>(pageable,this.findAll());
+        return paginator.paginate();
+    }
 }

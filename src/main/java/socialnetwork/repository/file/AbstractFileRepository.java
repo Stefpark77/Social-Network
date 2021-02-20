@@ -20,7 +20,6 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
         super(validator);
         this.fileName=fileName;
         loadData();
-
     }
 
 
@@ -74,6 +73,7 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
         }
         return e;
     }
+
     protected void writeToFile(E entity){
         try (BufferedWriter bW = new BufferedWriter(new FileWriter(fileName,true))) {
             bW.write(createEntityAsString(entity));

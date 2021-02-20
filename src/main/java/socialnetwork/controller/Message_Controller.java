@@ -6,34 +6,30 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import socialnetwork.domain.Group;
 import socialnetwork.domain.User;
-import socialnetwork.domain.UserDTO;
 import socialnetwork.domain.validators.UserValidator;
 import socialnetwork.domain.validators.ValidationException;
 import socialnetwork.service.GroupService;
 import socialnetwork.service.MessageService;
 import socialnetwork.service.UserService;
-import socialnetwork.utils.events.MessageorGroupChangeEvent;
+import socialnetwork.utils.events.FriendshipChangeEvent;
+import socialnetwork.utils.events.MessageGChangeEvent;
 import socialnetwork.utils.observer.Observer;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-public class Message_Controller implements Observer<MessageorGroupChangeEvent> {
+public class Message_Controller implements Observer<MessageGChangeEvent> {
     Stage primaryStage;
     private UserService user_crt;
     private MessageService messagecrt;
@@ -43,11 +39,16 @@ public class Message_Controller implements Observer<MessageorGroupChangeEvent> {
     private Group group=null;
     private String typeofchat="privatemessage";
     ObservableList<Group> modelGrade = FXCollections.observableArrayList();
+    ObservableList<User> modelGrade2 = FXCollections.observableArrayList();
+    ObservableList<String> modelmessages = FXCollections.observableArrayList();
+
     @Override
-    public void update(MessageorGroupChangeEvent messageChangeEvent) {
+    public void update(MessageGChangeEvent messageChangeEvent) {
         showChat();
         initModel();
     }
+
+
     public void setPrimaryStage(Stage s){
         primaryStage=s;
     }
@@ -59,18 +60,28 @@ public class Message_Controller implements Observer<MessageorGroupChangeEvent> {
         this.user=u;
         messagecrt.addObserver(this);
         groupcrt.addObserver(this);
+        MembersTable.setVisible(false);
+        MembersText.setVisible(false);
         initModel();
     }
 
     private List<Group> getAllGroupsofUser(Long id){
         return StreamSupport.stream(groupcrt.getAll().spliterator(),false)
-                //.filter(c -> c.findid(id))
                 .filter(c -> c.getIds().contains(id))
+                .collect(Collectors.toList());
+    }
+
+    private List<User> getAllMembers(){
+        return group.getIds().stream()
+                .map(c -> user_crt.getUser(String.valueOf(c)))
                 .collect(Collectors.toList());
     }
 
     private void initModel() {
         modelGrade.setAll(getAllGroupsofUser(user.getId()));
+        if(group!=null){
+            modelGrade2.setAll(getAllMembers());
+        }
     }
 
     @FXML
@@ -78,6 +89,13 @@ public class Message_Controller implements Observer<MessageorGroupChangeEvent> {
         GroupTable.setItems(modelGrade);
         DateColumn.setCellValueFactory(new PropertyValueFactory<Group, LocalDateTime>("date"));
         Group_NameColumn.setCellValueFactory(new PropertyValueFactory<Group, String>("name"));
+
+        MembersTable.setItems(modelGrade2);
+        FirstNameColumn.setCellValueFactory(new PropertyValueFactory<User, String>("firstName"));
+        LastNameColumn.setCellValueFactory(new PropertyValueFactory<User, String>("lastName"));
+
+
+        TheChat.setItems(modelmessages);
     }
 
     @FXML
@@ -115,10 +133,13 @@ public class Message_Controller implements Observer<MessageorGroupChangeEvent> {
             Allert_Controller.showErrorMessage(null, "No group was selected!");
             return;
         }
-        //TODO
-        //Validare grup??
         user2=null;
         typeofchat="groupmessage";
+        primaryStage.setWidth(850);
+        MembersTable.setVisible(true);
+        MembersText.setVisible(true);
+        initModel();
+        NameChat.setText("The Chat of the Group " + group.getName());
         showChat();
 
     }
@@ -130,30 +151,69 @@ public class Message_Controller implements Observer<MessageorGroupChangeEvent> {
             Allert_Controller.showErrorMessage(null, "No group was selected!");
             return;
         }
+        Long group_id_to_leave=group_to_leave.getId();
         messagecrt.addMessage(String.valueOf(user.getId()),String.valueOf(group_to_leave.getId()),"-left the Group","groupmessage");
         groupcrt.leaveGroup(String.valueOf(group_to_leave.getId()),String.valueOf(user.getId()));
         if(group==group_to_leave){
             group=null;
+            NameChat.setText("The Chat:");
+            MembersTable.setVisible(false);
+            MembersText.setVisible(false);
+            primaryStage.setWidth(650);
+        }
+        if(group_to_leave.getNumber_of_people()==0){
+            messagecrt.deleteAllGroupMessage(group_id_to_leave);
         }
         showChat();
     }
 
-    private void showChat(){
-        List<String> messages;
-        TheChat.setText("");
+     private List<String> GetMessages(){
         if(typeofchat.equals("groupmessage") && group!=null){
-            messages=messagecrt.Conv(String.valueOf(user.getId()),String.valueOf(group.getId()),typeofchat);
-            for(String line:messages){
-                TheChat.appendText(line+"\n");
-            }
+            return messagecrt.Conv(java.lang.String.valueOf(user.getId()), java.lang.String.valueOf(group.getId()),typeofchat);
+            /*for(java.lang.String line:messages){
+                TheChat.add(line+"\n");
+            }*/
         }
         if(typeofchat.equals("privatemessage") && user2!=null){
-            messages=messagecrt.Conv(String.valueOf(user.getId()),String.valueOf(user2.getId()),typeofchat);
-            for(String line:messages){
+            return messagecrt.Conv(java.lang.String.valueOf(user.getId()), java.lang.String.valueOf(user2.getId()),typeofchat);
+           /* for(java.lang.String line:messages){
                 TheChat.appendText(line+"\n");
-            }
+            }*/
         }
+        return new ArrayList<>();
+    }
 
+    private void showChat(){
+        List<String> messages;
+        modelmessages.setAll(GetMessages());
+    }
+
+    @FXML
+    void OnEnter(ActionEvent event) {
+        try {
+            String mess =MessageField.getText();
+            MessageField.setText("");
+            if(mess.equals("")){
+                Allert_Controller.showErrorMessage(null, "No Message was written!");
+                return;
+            }
+            if(user2==null && typeofchat.equals("privatemessage")){
+                Allert_Controller.showErrorMessage(null, "No Chat was selected!");
+                return;
+            }
+            if(group==null && typeofchat.equals("groupmessage")){
+                Allert_Controller.showErrorMessage(null, "No Chat was selected!");
+                return;
+            }
+            if(user2!=null){
+                messagecrt.addMessage(String.valueOf(user.getId()),String.valueOf(user2.getId()),mess,typeofchat);
+            }
+            if(group!=null){
+                messagecrt.addMessage(String.valueOf(user.getId()),String.valueOf(group.getId()),mess,typeofchat);
+            }
+        }  catch (ValidationException | IllegalArgumentException e){
+            Allert_Controller.showErrorMessage(null,e.getMessage());
+        }
     }
 
     @FXML
@@ -169,6 +229,10 @@ public class Message_Controller implements Observer<MessageorGroupChangeEvent> {
             user2=user_crt.getUser(id2);
             typeofchat="privatemessage";
             group=null;
+            MembersTable.setVisible(false);
+            MembersText.setVisible(false);
+            primaryStage.setWidth(650);
+            NameChat.setText("The Chat with the User " + user2.getFirstName() + " " + user2.getLastName());
             showChat();
         }  catch (ValidationException | IllegalArgumentException e){
             Allert_Controller.showErrorMessage(null,e.getMessage());
@@ -228,7 +292,7 @@ public class Message_Controller implements Observer<MessageorGroupChangeEvent> {
     private Button OpenPrivateChatButton;
 
     @FXML
-    private TextArea TheChat;
+    private ListView<String> TheChat;
 
     @FXML
     private Button GroupChatButton;
@@ -238,5 +302,20 @@ public class Message_Controller implements Observer<MessageorGroupChangeEvent> {
 
     @FXML
     private TextField MessageField;
+
+    @FXML
+    private Text NameChat;
+
+    @FXML
+    private TableView<User> MembersTable;
+
+    @FXML
+    private TableColumn<User, String> FirstNameColumn;
+
+    @FXML
+    private TableColumn<User, String> LastNameColumn;
+
+    @FXML
+    private Text MembersText;
 
 }

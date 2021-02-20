@@ -4,10 +4,10 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Message extends Entity<Long>{
-    //private Long id;
     private Long from_id;
     private Long to_id;
     private String message;
+    private String reply=null;
     private LocalDateTime date;
     private Messagetype type;
 
@@ -23,10 +23,30 @@ public class Message extends Entity<Long>{
             this.type=Messagetype.groupmessage;
         }
     }
-
+    public Message(Long from_id, Long to_id, String message,String type, LocalDateTime date,String reply) {
+        this.from_id = from_id;
+        this.to_id = to_id;
+        this.message = message;
+        this.date = date;
+        this.reply=reply;
+        if(type.equals("privatemessage")){
+            this.type=Messagetype.privatemessage;
+        }
+        if(type.equals("groupmessage")){
+            this.type=Messagetype.groupmessage;
+        }
+    }
 
     public Message() {
 
+    }
+
+    public String getReply() {
+        return reply;
+    }
+
+    public void setReply(String reply) {
+        this.reply = reply;
     }
 
     public Long getFrom_id() {
@@ -98,16 +118,4 @@ public class Message extends Entity<Long>{
         return Objects.hash(getFrom_id(), getTo_id(), getMessage(), getDate(),  getType());
     }
 
-    /* @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Message)) return false;
-        Message message1 = (Message) o;
-        boolean ok2 = true;
-        for(User to: getTo()){
-            if(!getTo().equals(to))
-                ok2 = false;
-        }
-        return getFrom().equals(message1.getFrom()) && ok2;
-    }*/
 }

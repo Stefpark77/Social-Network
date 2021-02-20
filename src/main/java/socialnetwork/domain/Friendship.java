@@ -35,7 +35,7 @@ public class Friendship extends Entity<Tuple<Long,Long>> {
     public void setDate(LocalDateTime date) {
         this.date = date;
     }
-
+    //test
     public long getId1() {
         return id1;
     }

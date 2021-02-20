@@ -106,8 +106,8 @@ public class CreateGroup_Controller {
 
     @FXML
     void handleFInish(ActionEvent event) {
-        if(the_users.size()<2){
-            Allert_Controller.showErrorMessage(null, "Not enough users!");
+        if(the_users.size()<3){
+            Allert_Controller.showErrorMessage(null, "Not enough members!(needs to be 3 or more)");
             return;
         }
         String name=theGroupName.getText();
